@@ -1,0 +1,48 @@
+name: Update Profile Stats
+
+on:
+workflow_dispatch:
+schedule:
+- cron: "0 0 * * *"
+
+permissions:
+contents: write
+
+jobs:
+update:
+runs-on: ubuntu-latest
+
+steps:
+  - name: Checkout
+    uses: actions/checkout@v4
+
+  - name: Generate GitHub Stats
+    uses: stats-organization/github-readme-stats-action@v2
+    with:
+      card: stats
+      options: username=${{ github.repository_owner }}&show_icons=true&theme=tokyonight&hide_border=true
+      path: profile/stats.svg
+      token: ${{ secrets.GITHUB_TOKEN }}
+
+  - name: Generate Top Languages
+    uses: stats-organization/github-readme-stats-action@v2
+    with:
+      card: top-langs
+      options: username=${{ github.repository_owner }}&layout=compact&theme=tokyonight&hide_border=true&langs_count=6
+      path: profile/top-langs.svg
+      token: ${{ secrets.GITHUB_TOKEN }}
+
+  - name: Generate Trophies
+    uses: soulteary/github-profile-trophy-action@v1.0.0
+    with:
+      options: username=${{ github.repository_owner }}&theme=tokyonight&no-frame=true&no-bg=true&column=4&row=2
+      path: profile/trophies.svg
+      token: ${{ secrets.GITHUB_TOKEN }}
+
+  - name: Save Changes
+    run: |
+      git config user.name "github-actions[bot]"
+      git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      git add profile/
+      git diff --cached --quiet || git commit -m "Update profile stats"
+      git push
